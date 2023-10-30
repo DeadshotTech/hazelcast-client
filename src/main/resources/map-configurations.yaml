@@ -1,0 +1,11 @@
+mapConfigurations:
+  - mapName: "person_map"
+    keyType: "String"
+    valueType: "com.thatninjaguyspeaks.hazelcast.avro.Person"
+  - mapName: "employee_map"
+    keyType: "Long"
+    valueType: "com.thatninjaguyspeaks.hazelcast.avro.Employee"
+  - mapName: "test_map"
+    keyType: "Long"
+    valueType: "com.thatninjaguyspeaks.hazelcast.models.PersonV1"
+  # ... other map configurations

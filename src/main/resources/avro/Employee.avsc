@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "Employee",
+  "namespace": "com.thatninjaguyspeaks.hazelcast.avro",
+  "fields": [
+    {"name": "soeId", "type": "string"},
+    {"name": "userName", "type": "string"}
+  ]
+}

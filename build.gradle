@@ -1,0 +1,64 @@
+import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
+
+plugins {
+	id 'application'
+	id 'groovy'
+	id 'org.springframework.boot' version '3.1.5'
+	id 'io.spring.dependency-management' version '1.1.3'
+	id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
+}
+
+application {
+	mainClass.set('com.thatninjaguyspeaks.hazelcast.HazelcastApplication')
+}
+
+group = 'com.thatninjaguyspeaks'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '21'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.apache.groovy:groovy'
+	implementation 'com.hazelcast:hazelcast:5.3.5'
+	implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+	implementation 'org.springframework.boot:spring-boot-starter-web:2.5.5'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0'
+	implementation 'com.hazelcast.jet:hazelcast-jet-avro:5.3.5'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+avro {
+	createSetters = true
+	fieldVisibility = "PRIVATE"
+	enableDecimalLogicalType = true
+}
+
+task generateAvro(type: GenerateAvroJavaTask) {
+	source("src/main/resources/avro")
+	outputDir = file("src/main/groovy")
+}
+
+//task packageFolder(type: Jar) {
+//	from 'src/main/groovy/com/thatninjaguyspeaks/hazelcast/avro'  // Replace with the actual path to the folder you want to package
+//	archiveBaseName = 'avro-classes'  // Replace with the desired base name of the JAR file
+//	archiveVersion = ''  // This will produce a JAR without a version number in the file name
+//}

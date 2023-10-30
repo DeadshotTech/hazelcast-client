@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast-client xmlns="http://www.hazelcast.com/schema/client-config"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.hazelcast.com/schema/client-config
+                  http://www.hazelcast.com/schema/client-config/hazelcast-client-config-5.3.xsd">
+
+    <cluster-name>dev</cluster-name>
+    <instance-name>Management-Center</instance-name>
+    <properties>
+        <property name="hazelcast.client.shuffle.member.list">true</property>
+        <property name="hazelcast.client.heartbeat.timeout">60000</property>
+        <property name="hazelcast.client.heartbeat.interval">5000</property>
+        <property name="hazelcast.client.event.thread.count">5</property>
+        <property name="hazelcast.client.event.queue.capacity">1000000</property>
+        <property name="hazelcast.client.invocation.timeout.seconds">120</property>
+        <property name="hazelcast.mc.metrics.disk.ttl.days">1</property>
+    </properties>
+    <network>
+        <cluster-members>
+            <address>127.0.0.1</address>
+        </cluster-members>
+        <outbound-ports>
+            <ports>34600</ports>
+            <ports>34700-34710</ports>
+        </outbound-ports>
+        <smart-routing>true</smart-routing>
+        <redo-operation>true</redo-operation>
+        <connection-timeout>60000</connection-timeout>
+        <socket-options>
+            <tcp-no-delay>false</tcp-no-delay>
+            <keep-alive>true</keep-alive>
+            <reuse-address>true</reuse-address>
+            <linger-seconds>3</linger-seconds>
+            <buffer-size>128</buffer-size>
+        </socket-options>
+    </network>
+    <connection-strategy>
+        <connection-retry>
+            <!--
+            How long the client should keep trying connecting to the server.
+            -->
+            <cluster-connect-timeout-millis>1000</cluster-connect-timeout-millis>
+        </connection-retry>
+    </connection-strategy>
+</hazelcast-client>
