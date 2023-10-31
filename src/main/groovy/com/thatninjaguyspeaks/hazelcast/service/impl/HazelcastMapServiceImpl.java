@@ -8,6 +8,7 @@ import com.thatninjaguyspeaks.hazelcast.models.MapConfiguration;
 import com.thatninjaguyspeaks.hazelcast.service.HazelcastMapService;
 import com.thatninjaguyspeaks.hazelcast.utils.ConfigUtils;
 import com.thatninjaguyspeaks.hazelcast.utils.DataConvertorUtils;
+import com.thatninjaguyspeaks.hazelcast.utils.HazelcastUtils;
 import com.thatninjaguyspeaks.hazelcast.utils.KeyGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,7 +55,7 @@ public class HazelcastMapServiceImpl implements HazelcastMapService {
             if(mapData!=null && !mapData.isEmpty())
                 mapData.parallelStream().forEach((datum) -> {
                     logger.info("Datum: {}", datum);
-                    map.put(getKey(mapConfig, keyGenerator), datum);
+                    map.put(HazelcastUtils.getKey(mapConfig.getKeyType(), keyGenerator), datum);
                 });
             else
                 logger.warn("No data was inserted as the data to be inserted is empty after processing");
@@ -89,11 +90,4 @@ public class HazelcastMapServiceImpl implements HazelcastMapService {
         logger.info("Obtained map and deleted map");
     }
 
-    public Object getKey(MapConfiguration mapConfiguration, KeyGenerator keyGenerator) {
-        switch (mapConfiguration.getKeyType().toLowerCase()) {
-            case "string": return keyGenerator.getStringKey();
-            default:
-                return keyGenerator.getKey();
-        }
-    }
 }
