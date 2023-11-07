@@ -3,6 +3,7 @@ package com.thatninjaguyspeaks.hazelcast.service.impl;
 import com.hazelcast.map.IMap;
 import com.thatninjaguyspeaks.hazelcast.config.ConfigurationLoader;
 import com.thatninjaguyspeaks.hazelcast.config.HazelcastClientInitializer;
+import com.thatninjaguyspeaks.hazelcast.dto.MapGetRequestDTO;
 import com.thatninjaguyspeaks.hazelcast.dto.MapPutRequestDTO;
 import com.thatninjaguyspeaks.hazelcast.models.MapConfiguration;
 import com.thatninjaguyspeaks.hazelcast.service.HazelcastMapService;
@@ -30,11 +31,11 @@ public class HazelcastMapServiceImpl implements HazelcastMapService {
     ConfigurationLoader configurationLoader;
 
     @Override
-    public Object getMapData(Object key) {
+    public Object getMapData(MapGetRequestDTO request) {
         var hazelcastInstance = hazelcastClientInitializer.getHazelcastInstance();
-        IMap<Object, Object> map = hazelcastInstance.getMap(MAP_NAME);
-        Object value = map.get(key);
-        logger.info("Returning value {}", value);
+        IMap<Object, Object> map = hazelcastInstance.getMap(request.getMapName());
+        Object value = map.get(request.getKey());
+        logger.info("Returning value {} for the request: {}", value, request);
         return value;
     }
 
@@ -51,7 +52,7 @@ public class HazelcastMapServiceImpl implements HazelcastMapService {
         try{
             mapConfig = ConfigUtils.extractMapConfig(mapName,
                     configurationLoader.getMapConfigurations());
-            mapData = DataConvertorUtils.convertGenericToMapData(mapConfig, mapPutRequestDTO.getData());
+            mapData = DataConvertorUtils.convertGenericToMapData(mapConfig, mapPutRequestDTO.getValue());
             if(mapData!=null && !mapData.isEmpty())
                 mapData.parallelStream().forEach((datum) -> {
                     logger.info("Datum: {}", datum);
