@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SqlRequest {
+public class SqlInputRequestDTO {
 
     @Schema(description = "Name of the Hazelcast map to operate on", required = true)
     private String mapName;

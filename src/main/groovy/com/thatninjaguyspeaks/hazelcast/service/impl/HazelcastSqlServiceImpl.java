@@ -3,7 +3,7 @@ package com.thatninjaguyspeaks.hazelcast.service.impl;
 import com.hazelcast.sql.SqlStatement;
 import com.thatninjaguyspeaks.hazelcast.avro.Person;
 import com.thatninjaguyspeaks.hazelcast.config.HazelcastClientInitializer;
-import com.thatninjaguyspeaks.hazelcast.dto.SqlRequest;
+import com.thatninjaguyspeaks.hazelcast.dto.SqlInputRequestDTO;
 import com.thatninjaguyspeaks.hazelcast.service.HazelcastSqlService;
 import com.thatninjaguyspeaks.hazelcast.utils.HazelcastUtils;
 import com.thatninjaguyspeaks.hazelcast.utils.KeyGenerator;
@@ -29,7 +29,7 @@ public class HazelcastSqlServiceImpl implements HazelcastSqlService {
     HazelcastClientInitializer hazelcastClientInitializer;
 
     @Override
-    public Object executeSqlQuery(SqlRequest sqlRequest) {
+    public Object executeSqlQuery(SqlInputRequestDTO sqlRequest) {
         logger.info("Starting sql query execution");
         final var hz = hazelcastClientInitializer.getHazelcastInstance();
         final KeyGenerator keyGenerator = new KeyGenerator(sqlRequest.getMapName(), hz);
@@ -83,7 +83,7 @@ public class HazelcastSqlServiceImpl implements HazelcastSqlService {
 
 
     @Override
-    public void createSqlMapping(SqlRequest sqlRequest){
+    public void createSqlMapping(SqlInputRequestDTO sqlRequest){
         var hz = hazelcastClientInitializer.getHazelcastInstance();
         var sqlService = hz.getSql();
         String statement = getSql(sqlRequest.getMapName());
