@@ -28,6 +28,11 @@
         </classNames>
     </user-code-deployment>
 
+    <serialization>
+        <serializers>
+            <serializer type-class="com.thatninjaguyspeaks.hazelcast.avro.Person" class-name="com.thatninjaguyspeaks.hazelcast.serializers.AvroSerializer"/>
+        </serializers>
+    </serialization>
 <!--    <serialization>-->
 <!--        <serializers>-->
 <!--            <serializer type-class="com.thatninjaguyspeaks.hazelcast.avro.Person" class-name="com.thatninjaguyspeaks.hazelcast.serializers.AvroSerializer"/>-->

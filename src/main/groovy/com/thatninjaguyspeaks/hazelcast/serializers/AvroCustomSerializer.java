@@ -16,9 +16,9 @@ import java.io.IOException;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AvroCustomSerializer<T> implements ByteArraySerializer<T> {
+public class AvroCustomSerializer implements ByteArraySerializer {
 
-    private Class<T> clazz;
+    private Class clazz;
     private Schema schema;
 
     @Override
@@ -27,9 +27,9 @@ public class AvroCustomSerializer<T> implements ByteArraySerializer<T> {
     }
 
     @Override
-    public byte[] write(T object) throws IOException {
+    public byte[] write(Object object) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        DatumWriter<T> datumWriter = new SpecificDatumWriter<>(clazz);
+        DatumWriter<Object> datumWriter = new SpecificDatumWriter<>(clazz);
         Encoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
         datumWriter.write(object, encoder);
         encoder.flush();
@@ -37,8 +37,8 @@ public class AvroCustomSerializer<T> implements ByteArraySerializer<T> {
     }
 
     @Override
-    public T read(byte[] buffer) throws IOException {
-        DatumReader<T> datumReader = new SpecificDatumReader<>(schema);
+    public Object read(byte[] buffer) throws IOException {
+        DatumReader<Object> datumReader = new SpecificDatumReader<>(schema);
         Decoder decoder = DecoderFactory.get().binaryDecoder(buffer, null);
         return datumReader.read(null, decoder);
     }

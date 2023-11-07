@@ -29,7 +29,6 @@ public class DataConvertorUtils {
         AvroCustomSerializer avroSerializer = AvroCustomSerializer.builder()
                 .clazz(clazz)
                 .schema(valueSchema).build();
-        avroSerializer.setSchema(valueSchema);
 
         return data.parallelStream()
                 .map(datum -> {
