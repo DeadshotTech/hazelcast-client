@@ -1,8 +1,9 @@
 package com.thatninjaguyspeaks.hazelcast.service;
 
-import org.springframework.stereotype.Service;
+import com.thatninjaguyspeaks.hazelcast.dto.SqlInputRequestDTO;
 
-@Service
 public interface HazelcastSqlService {
-    Object executeSqlQuery();
+    Object executeSqlQuery(SqlInputRequestDTO sqlRequest);
+
+    void createSqlMapping(SqlInputRequestDTO sqlRequest);
 }

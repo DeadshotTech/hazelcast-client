@@ -16,7 +16,12 @@ group = 'com.thatninjaguyspeaks'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '21'
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile) {
+	options.compilerArgs += ['-parameters']
 }
 
 configurations {
@@ -56,9 +61,3 @@ task generateAvro(type: GenerateAvroJavaTask) {
 	source("src/main/resources/avro")
 	outputDir = file("src/main/groovy")
 }
-
-//task packageFolder(type: Jar) {
-//	from 'src/main/groovy/com/thatninjaguyspeaks/hazelcast/avro'  // Replace with the actual path to the folder you want to package
-//	archiveBaseName = 'avro-classes'  // Replace with the desired base name of the JAR file
-//	archiveVersion = ''  // This will produce a JAR without a version number in the file name
-//}

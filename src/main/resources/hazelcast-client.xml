@@ -21,13 +21,20 @@
         <classNames>
             <!-- Specify the fully qualified names of the classes you want to deploy -->
             <!-- Comment the below files if the user-code-deployment is enabled and additional file needs to be pushed-->
-            <className>com.thatninjaguyspeaks.hazelcast.avro.Person</className>
-            <className>com.thatninjaguyspeaks.hazelcast.avro.Employee</className>
-            <className>com.thatninjaguyspeaks.hazelcast.avro.Person$Builder</className>
-            <className>com.thatninjaguyspeaks.hazelcast.avro.Employee$Builder</className>
+<!--            <className>com.thatninjaguyspeaks.hazelcast.avro.Person</className>-->
+<!--            <className>com.thatninjaguyspeaks.hazelcast.avro.Employee</className>-->
+<!--            <className>com.thatninjaguyspeaks.hazelcast.avro.Person$Builder</className>-->
+<!--            <className>com.thatninjaguyspeaks.hazelcast.avro.Employee$Builder</className>-->
+            <className>com.thatninjaguyspeaks.hazelcast.service.HazelcastPipelineService</className>
+            <className>com.thatninjaguyspeaks.hazelcast.service.impl.HazelcastPipelineServiceImpl</className>
         </classNames>
     </user-code-deployment>
 
+    <serialization>
+        <serializers>
+            <serializer type-class="com.thatninjaguyspeaks.hazelcast.avro.Person" class-name="com.thatninjaguyspeaks.hazelcast.serializers.AvroSerializer"/>
+        </serializers>
+    </serialization>
 <!--    <serialization>-->
 <!--        <serializers>-->
 <!--            <serializer type-class="com.thatninjaguyspeaks.hazelcast.avro.Person" class-name="com.thatninjaguyspeaks.hazelcast.serializers.AvroSerializer"/>-->
