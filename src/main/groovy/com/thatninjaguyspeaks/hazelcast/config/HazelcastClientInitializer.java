@@ -1,8 +1,6 @@
 package com.thatninjaguyspeaks.hazelcast.config;
 
 import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.client.config.ClientConfig;
-import com.hazelcast.client.config.ClientUserCodeDeploymentConfig;
 import com.hazelcast.core.HazelcastInstance;
 import jakarta.annotation.PostConstruct;
 import org.apache.logging.log4j.LogManager;
