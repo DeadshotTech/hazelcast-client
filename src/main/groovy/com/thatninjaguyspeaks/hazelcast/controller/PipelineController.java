@@ -1,4 +1,5 @@
 package com.thatninjaguyspeaks.hazelcast.controller;
+import com.thatninjaguyspeaks.hazelcast.dto.MapGetRequestDTO;
 import com.thatninjaguyspeaks.hazelcast.service.HazelcastMapService;
 import com.thatninjaguyspeaks.hazelcast.service.HazelcastPipelineService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/com/thatninjaguyspeaks/hazelcast/pipeline")
@@ -25,6 +27,15 @@ public class PipelineController {
     public ResponseEntity<Object> triggerPipeline(){
         hazelcastPipelineService.triggerPipeline();
         return ResponseEntity.ok("SUCCESS");
+    }
+
+    @GetMapping("/search/{key}")
+    @Operation(summary = "Get Map Data", description = "Retrieves data from the Hazelcast map for the given key")
+    @ApiResponse(responseCode = "200", description = "Data retrieved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Object.class)))
+    public Flux<String> search(@PathVariable String key){
+        return hazelcastPipelineService.search(key);
     }
 
 }

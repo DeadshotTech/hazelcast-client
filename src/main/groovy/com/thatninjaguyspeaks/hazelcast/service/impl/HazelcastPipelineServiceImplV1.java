@@ -11,6 +11,7 @@ import com.thatninjaguyspeaks.hazelcast.service.HazelcastPipelineService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Flux;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -24,6 +25,11 @@ public class HazelcastPipelineServiceImplV1 implements HazelcastPipelineService 
     public void triggerPipeline() {
 //        writeMap();
 //        transferDataAcrossMapWithLogging();
+    }
+
+    @Override
+    public Flux<String> search(String data) {
+        return null;
     }
 
     private void transferDataAcrossMap() {
