@@ -38,4 +38,12 @@ public class PipelineController {
         return hazelcastPipelineService.search(key);
     }
 
+    @GetMapping("/api/load")
+    @Operation(summary = "Get API Data", description = "Retrieves data from the API and returns")
+    @ApiResponse(responseCode = "200", description = "Data retrieved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Object.class)))
+    public Flux<String> loadApiData(){
+        return hazelcastPipelineService.loadApiData();
+    }
 }

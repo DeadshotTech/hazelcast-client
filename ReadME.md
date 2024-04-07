@@ -39,3 +39,16 @@ The [ConfigurationLoader](https://github.com/DeadshotTech/hazelcast-client-data/
 The application provides a Swagger UI for API documentation and testing. You can access the Swagger UI at the `/swagger-ui/` endpoint of your deployed application.
 
 ---
+
+## Testing Flux endpoints using Developer Console
+
+const eventSource = new EventSource('http://localhost:8081/com/thatninjaguyspeaks/hazelcast/pipeline/search/oa');
+eventSource.onmessage = function(event) {
+console.log('Received:', event.data);
+};
+eventSource.onerror = function(error) {
+console.error('EventSource failed:', error);
+eventSource.close();
+};
+
+---
