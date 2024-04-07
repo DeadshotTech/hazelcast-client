@@ -32,6 +32,11 @@ public class HazelcastPipelineServiceImplV1 implements HazelcastPipelineService 
         return null;
     }
 
+    @Override
+    public Flux<String> loadApiData() {
+        return null;
+    }
+
     private void transferDataAcrossMap() {
         var hz = hazelcastClientInitializer.getHazelcastInstance();
         Pipeline p = Pipeline.create();

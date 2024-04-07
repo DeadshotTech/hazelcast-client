@@ -1,11 +1,12 @@
 package com.thatninjaguyspeaks.hazelcast.service.impl;
 
 import com.hazelcast.jet.config.JobConfig;
+import com.hazelcast.jet.datamodel.Tuple2;
 import com.hazelcast.jet.pipeline.*;
-
 import com.hazelcast.map.IMap;
 import com.thatninjaguyspeaks.hazelcast.config.HazelcastClientInitializer;
 import com.thatninjaguyspeaks.hazelcast.service.HazelcastPipelineService;
+import com.thatninjaguyspeaks.hazelcast.sources.ApiBatchSource;
 import com.thatninjaguyspeaks.hazelcast.utils.FilterProcessor;
 import com.thatninjaguyspeaks.hazelcast.utils.LineProcessor;
 import com.thatninjaguyspeaks.hazelcast.utils.SearchProcessor;
@@ -106,6 +107,40 @@ public class HazelcastPipelineServiceImpl implements HazelcastPipelineService {
         public static boolean filterBySearchString(Map.Entry<String, String> entry, String searchString) {
             return entry.getValue().contains(searchString);
         }
+    }
+
+    @Override
+    public Flux<String> loadApiData() {
+        var hz = hazelcastClientInitializer.getHazelcastInstance();
+        JobConfig jobConfig = new JobConfig();
+//        jobConfig.addClass(ApiSource.class);
+        jobConfig.addJar("/Users/deadshot/Desktop/Code/hazelcast-client-data-interface/hazelcast-client-data-interface/build/libs/hazelcast-client-interface-fat-0.0.1-SNAPSHOT.jar");
+        return Flux.create(fluxSink -> {
+            Pipeline pipeline = buildApiDataLoadPipeline(fluxSink);
+            hz.getJet().newJob(pipeline, jobConfig).join();
+        });
+    }
+    private Pipeline buildApiDataLoadPipeline(FluxSink<String> fluxSink) {
+        var hz = hazelcastClientInitializer.getHazelcastInstance();
+        Pipeline pipeline = Pipeline.create();
+
+        BatchStage<Tuple2<Integer, String>> transformedStage = pipeline
+                .readFrom(ApiBatchSource.buildApiStreamSource())
+                .map(item -> Tuple2.tuple2(item.hashCode(), item))  // Transform string to a key-value pair
+                .setName("apiDataSource");
+
+        // Stream only the value part (original string) to an observable
+        transformedStage.map(Tuple2::getValue)
+                .writeTo(Sinks.observable("apiDataResults"));
+        // Listen to the observable sink and push results to the Flux
+        hz.getJet().getObservable("apiDataResults")
+                .addObserver(event -> fluxSink.next(event.toString()));
+
+        // Write key-value pairs to the Hazelcast map
+        transformedStage
+                .writeTo(Sinks.map("apiDataMap"));
+
+        return pipeline;
     }
 }
 

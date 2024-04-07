@@ -5,6 +5,7 @@ import reactor.core.publisher.Flux;
 public interface HazelcastPipelineService {
 
     void triggerPipeline();
-
     Flux<String> search(String data);
+    Flux<String> loadApiData();
+
 }

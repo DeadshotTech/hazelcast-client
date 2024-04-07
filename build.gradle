@@ -6,6 +6,7 @@ plugins {
 	id 'org.springframework.boot' version '3.1.5'
 	id 'io.spring.dependency-management' version '1.1.3'
 	id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
+	id 'com.github.johnrengelman.shadow' version '7.1.2' // Check for the latest version
 }
 
 application {
@@ -44,6 +45,10 @@ dependencies {
 	implementation 'com.hazelcast.jet:hazelcast-jet-avro:5.3.5'
 	implementation 'io.projectreactor:reactor-core:3.4.10'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	// Apache HTTP Components for fluent API
+	implementation 'org.apache.httpcomponents:fluent-hc:4.5.13'
+// Core libraries of Apache HTTP client
+	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -62,4 +67,15 @@ avro {
 task generateAvro(type: GenerateAvroJavaTask) {
 	source("src/main/resources/avro")
 	outputDir = file("src/main/groovy")
+}
+
+shadowJar {
+	archiveBaseName.set('hazelcast-client-interface-fat')
+	archiveClassifier.set(null)  // this will overwrite the default '-all' suffix
+	archiveVersion.set('0.0.1-SNAPSHOT')
+	mergeServiceFiles()
+}
+
+tasks.build {
+	dependsOn shadowJar
 }
