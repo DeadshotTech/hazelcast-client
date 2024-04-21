@@ -1,5 +1,7 @@
 package com.thatninjaguyspeaks.hazelcast.service.impl;
 
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.jet.Job;
 import com.hazelcast.jet.config.JobConfig;
 import com.hazelcast.jet.datamodel.Tuple2;
 import com.hazelcast.jet.pipeline.*;
@@ -7,17 +9,26 @@ import com.hazelcast.map.IMap;
 import com.thatninjaguyspeaks.hazelcast.config.HazelcastClientInitializer;
 import com.thatninjaguyspeaks.hazelcast.service.HazelcastPipelineService;
 import com.thatninjaguyspeaks.hazelcast.sources.ApiBatchSource;
+import com.thatninjaguyspeaks.hazelcast.sources.SocketSource;
 import com.thatninjaguyspeaks.hazelcast.utils.FilterProcessor;
 import com.thatninjaguyspeaks.hazelcast.utils.LineProcessor;
 import com.thatninjaguyspeaks.hazelcast.utils.SearchProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 
+import java.io.*;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 public class HazelcastPipelineServiceImpl implements HazelcastPipelineService {
@@ -28,7 +39,8 @@ public class HazelcastPipelineServiceImpl implements HazelcastPipelineService {
 
     @Override
     public void triggerPipeline() {
-        loadDataFromExcel();
+        writeExcelDataToSocket();
+//        loadDataFromExcel();
 //        loadFilteredDataFromExcel();
     }
 
@@ -39,15 +51,75 @@ public class HazelcastPipelineServiceImpl implements HazelcastPipelineService {
         JobConfig jobConfig = new JobConfig();
         jobConfig.addClass(LineProcessor.class);
         // Corrected file source setup
-        BatchSource<String> fileSource = Sources.files("/Users/deadshot/Desktop/Code/hazelcast-client-data-interface/hazelcast-client-data-interface/src/main/resources/test");
+
+//        BatchSource<String> fileSource = Sources.files("/Users/deadshot/Desktop/Code/hazelcast-client-data-interface/hazelcast-client-data-interface/src/main/resources/test");
+        BatchSource<String> fileSource = Sources.files("src/main/resources/test");
         p.readFrom(fileSource)
                 .map(new LineProcessor())
                 .writeTo(Sinks.map("csvMap"));
-        hz.getJet().newJob(p, jobConfig).join();
+        try {
+            hz.getJet().newJob(p, jobConfig).join();
+        } catch (Exception e) {
+            e.printStackTrace(); // Print the stack trace for debugging
+        }
 //        hz.shutdown();
     }
 
+    @EventListener(ApplicationReadyEvent.class)
+    private void startSocketReadPipeline() {
+        HazelcastInstance hz = hazelcastClientInitializer.getHazelcastInstance();
+        Pipeline p = Pipeline.create();
+        JobConfig jobConfig = new JobConfig()
+                .setName("socketReadPipeline")
+                .addClass(SocketSource.class)
+                .addClass(LineProcessor.class)
+                .addClass(FilterProcessor.class);
 
+        try {
+            p.readFrom(SocketSource.buildNetworkSource())
+                    .withoutTimestamps()
+                    .map(new LineProcessor())
+                    .peek()
+                    .filter(new FilterProcessor())
+                    .writeTo(Sinks.map("csvFilteredMapSocket"));
+
+            Job job = hz.getJet().newJobIfAbsent(p, jobConfig);
+            job.join();
+            logger.info("Socket read pipeline job submitted and running.");
+        } catch (Exception e) {
+            logger.error("Failed to start socket read pipeline", e);
+        }
+    }
+
+    private void writeExcelDataToSocket() {
+        String filePath = "src/main/resources/test/nasdaqlisted.csv";
+        String host = "localhost";
+        int port = 9097;
+        try (Socket socket = new Socket(host, port);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             Stream<String> lines = Files.lines(Paths.get(filePath))) {
+            logger.info("Connected to the socket at {}:{}", host, port);
+            lines.forEach(out::println);
+        } catch (IOException e) {
+            logger.error("Failed to write data to socket: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void uploadCsvData(InputStream fileStream) {
+        String host = "localhost";
+        int port = 9097;
+        try (Socket socket = new Socket(host, port);
+             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)), true);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(fileStream, StandardCharsets.UTF_8));
+             Stream<String> lines = reader.lines();) {
+            logger.info("Connected to the socket at {}:{}", host, port);
+            lines.forEach(out::println);
+        } catch (IOException e) {
+            logger.error("Failed to write data to socket: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to send data over socket", e);
+        }
+    }
 
     private void loadFilteredDataFromExcel() {
         var hz = hazelcastClientInitializer.getHazelcastInstance();
@@ -63,7 +135,6 @@ public class HazelcastPipelineServiceImpl implements HazelcastPipelineService {
                 .filter(new FilterProcessor())
                 .writeTo(Sinks.map("csvFilteredMap"));
         hz.getJet().newJob(p, jobConfig).join();
-//        hz.shutdown();
     }
 
     @Override
@@ -142,6 +213,7 @@ public class HazelcastPipelineServiceImpl implements HazelcastPipelineService {
 
         return pipeline;
     }
+
 }
 
 
