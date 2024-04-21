@@ -61,3 +61,23 @@ public class PipelineController {
         return hazelcastPipelineService.loadApiData();
     }
 }
+
+//@RestController
+//@RequestMapping("/api")
+//public class FileUploadController {
+//
+//    @PostMapping(path = "/upload", consumes = "multipart/form-data", produces = "text/plain")
+//    @Operation(summary = "Trigger pipeline", description = "Runs pipeline and inserts data to the Hazelcast map")
+//    public Mono<ResponseEntity<Object>> uploadCsvData(@RequestPart("file") FilePart file) {
+//        return Mono.just(file)
+//                .flatMap(filePart -> processFile(filePart))
+//                .map(status -> ResponseEntity.ok().body("SUCCESS"))
+//                .onErrorResume(e -> Mono.just(ResponseEntity.ok().body("Failed to upload: " + e.getMessage())));
+//    }
+//
+//    private Mono<String> processFile(FilePart filePart) {
+//        // Assuming hazelcastPipelineService.uploadCsvData now accepts a Flux<DataBuffer>
+//        return hazelcastPipelineService.uploadCsvData(filePart.content())
+//                .thenReturn("Processed Successfully");
+//    }
+//}

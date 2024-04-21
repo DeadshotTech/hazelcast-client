@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.stream.Stream;
 
 @Service
@@ -65,9 +66,7 @@ public class HazelcastPipelineServiceImpl implements HazelcastPipelineService {
 //        hz.shutdown();
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    private void startSocketReadPipeline() {
-        HazelcastInstance hz = hazelcastClientInitializer.getHazelcastInstance();
+    private void startSocketReadPipeline(HazelcastInstance hz) {
         Pipeline p = Pipeline.create();
         JobConfig jobConfig = new JobConfig()
                 .setName("socketReadPipeline")
@@ -91,10 +90,29 @@ public class HazelcastPipelineServiceImpl implements HazelcastPipelineService {
         }
     }
 
+    @EventListener(ApplicationReadyEvent.class)
+    private void restartPipeline() {
+        HazelcastInstance hz = hazelcastClientInitializer.getHazelcastInstance();
+        hz.getJet().getJobs().forEach(job -> {
+            if (job.getName().equals("socketReadPipeline")) {
+                // Cancel the existing job
+                job.cancel();
+                try {
+                    job.join(); // Wait for the job to complete termination
+                } catch (CancellationException e) {
+                    logger.info("Job was cancelled successfully.");
+                }
+            }
+        });
+
+        // Now, submit the new job
+        startSocketReadPipeline(hz);
+    }
+
     private void writeExcelDataToSocket() {
         String filePath = "src/main/resources/test/nasdaqlisted.csv";
         String host = "localhost";
-        int port = 9097;
+        int port = 9090;
         try (Socket socket = new Socket(host, port);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              Stream<String> lines = Files.lines(Paths.get(filePath))) {
@@ -108,7 +126,7 @@ public class HazelcastPipelineServiceImpl implements HazelcastPipelineService {
     @Override
     public void uploadCsvData(InputStream fileStream) {
         String host = "localhost";
-        int port = 9097;
+        int port = 9090;
         try (Socket socket = new Socket(host, port);
              PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)), true);
              BufferedReader reader = new BufferedReader(new InputStreamReader(fileStream, StandardCharsets.UTF_8));

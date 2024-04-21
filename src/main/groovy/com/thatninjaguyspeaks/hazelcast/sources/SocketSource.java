@@ -16,7 +16,7 @@ public class SocketSource {
     public static StreamSource<String> buildNetworkSource() {
         return SourceBuilder
                 .stream("network-source", procCtx -> {
-                    int port = 9097;
+                    int port = 9090;
                     ServerSocket serverSocket = new ServerSocket(port);
                     procCtx.logger().info("Server socket opened on port " + port);
                     return new NetworkContext(serverSocket);
@@ -31,6 +31,8 @@ public class SocketSource {
                         }
                     } catch (IOException e) {
                         context.getLogger().error("Error reading from socket: " + e.getMessage(), e);
+                    }finally {
+                        socket.close();
                     }
                 })
                 .destroyFn(NetworkContext::close)
