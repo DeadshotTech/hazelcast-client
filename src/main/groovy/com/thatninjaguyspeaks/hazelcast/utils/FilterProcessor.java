@@ -9,7 +9,8 @@ public class FilterProcessor implements PredicateEx<Map.Entry<String, String>>, 
 
         @Override
         public boolean testEx(Map.Entry<String, String> entry) throws Exception {
-            return entry.getValue().split(",")[0].contains("A");
+//            return entry.getValue().split(",")[0].contains("A");
+            return true;
         }
 
 }
